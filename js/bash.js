@@ -1,203 +1,193 @@
 function FileSystem() {
     this.contents = [];
-    this.currentdir = "none";
+    this.currentdir = this;
     this.container = this;
+    this.type = "filesystem";
+    this.name = "mockfs";
 }
 
-function DirSearch(path) {
+function DirCreate(path) {
+    var savedir = fs.currentdir;
+    var newpath = [];
+    for (var i = 1; i < path.length; i++) {
+        newpath.push(path[i]);
+    }
     var currentdir;
+    var returndir;
     if (path[0] == "") {
-        currentdir == fs;
+        fs.currentdir == fs;
+        currentdir = fs.currentdir;
+        returndir = DirCreate(newpath);
+        return(returndir);
     }
     else if (path[0] == "..") {
-        currentdir = fs.currentdir.container;
+        fs.currentdir = fs.currentdir.container;
+        returndir = DirCreate(newpath);
+        return(returndir);
     }
     else {
         currentdir = fs.currentdir;
     }
-    for (var i = 0; i < currentdir.contents; i++) {
-        //code
+    var cur;
+    var check = false;
+    if (newpath.length != 0) {
+        for (var i = 0; i < currentdir.contents.length; i++) {
+            cur = currentdir.contents[i];
+            console.log("searching for " + path[0]);
+            if (cur.type == "folder" && cur.name == path[0]) {
+                console.log("found " + path[0]);
+                fs.currentdir = cur;
+                check = true;
+                returndir = DirCreate(newpath);
+                fs.currentdir = savedir;
+                return(returndir);
+            }
+        }
+    }
+    else {
+        for (var i = 0; i < currentdir.contents.length; i++) {
+            cur = currentdir.contents[i];
+            console.log("searching for " + path[0]);
+            if (cur.type == "folder" && cur.name == path[0]) {
+                console.log("found " + path[0]);
+                fs.currentdir = cur;
+                check = true;
+            }
+        }
+    }
+    if (newpath.length > 0 && check == false) {
+        return("ERROR: The directory "+newpath[0]+" does not exist.");
+    }
+    else if(newpath.length == 0 && check == false){
+        return(currentdir);
+    }
+    else if (newpath.length == 0 && check == true) {
+        return("ERROR: The directory already exists");
+    }
+    else {
+        return("why");
+    }
+}
+
+function DirSearch(path) {
+    var savedir = fs.currentdir;
+    var newpath = [];
+    for (var i = 1; i < path.length; i++) {
+        newpath.push(path[i]);
+    }
+    var currentdir;
+    var returndir;
+    if (path[0] == "") {
+        fs.currentdir == fs;
+        currentdir = fs.currentdir;
+        returndir = DirSearch(newpath);
+        return(returndir);
+    }
+    else if (path[0] == "..") {
+        fs.currentdir = fs.currentdir.container;
+        returndir = DirSearch(newpath);
+        return(returndir);
+    }
+    else {
+        currentdir = fs.currentdir;
+    }
+    var cur;
+    var check = false;
+    if (newpath.length != 0) {
+        for (var i = 0; i < currentdir.contents.length; i++) {
+            cur = currentdir.contents[i];
+            console.log("searching for " + path[0]);
+            if (cur.type == "folder" && cur.name == path[0]) {
+                console.log("found " + path[0]);
+                fs.currentdir = cur;
+                check = true;
+                returndir = DirSearch(newpath);
+                fs.currentdir = savedir;
+                return(returndir);
+            }
+        }
+    }
+    else {
+        for (var i = 0; i < currentdir.contents.length; i++) {
+            cur = currentdir.contents[i];
+            console.log("searching for " + path[0]);
+            if (cur.type == "folder" && cur.name == path[0]) {
+                console.log("found " + path[0]);
+                fs.currentdir = savedir;
+                return(cur);
+            }
+        }
+    }
+    if (newpath.length > 0 && check == false) {
+        return("ERROR: The directory "+newpath[0]+" does not exist.");
+    }
+    else if(newpath.length == 0 && check == false){
+        return(currentdir);
+    }
+    else {
+        return("why");
     }
 }
 
 function Dir(inpath) {
-    inpath = inpath.replace(/\s+/g, '');
-    this.path = inpath.split("/");
+    this.type = "folder";
+    var path = PreparePath(inpath);
     this.contents = [];
-    if (fs.currentdir == "none") {
-        this.container = fs;
-        fs.currentdir = this;
-    }
-    else {
-        if (this.path.length > 1) {
-            if (this.path[0] == "") {
-                //code
-            }
+    this.container = DirCreate(path);
+    this.container.contents.push(this);
+    this.name = path[path.length-1];
+    
+    var currentdir = this;
+    this.buildpath = function() {
+        if (currentdir.container.type == "folder") {
+            return(currentdir.container.buildpath() + "/" + currentdir.name);
+        }
+        else {
+            return("/" + currentdir.name);
         }
     }
-    this.name = path[path.length-1];
 }
 
 function File(path) {
-    
+    this.type = "file";
+    this.name = "";
 }
 
-var fs = new FileSystem();
+function ChangeDir(inpath) {
+    var path = PreparePath(inpath);
+    fs.currentdir = DirSearch(path);
+}
 
-$(document).ready(function(){
-    
-    
-    //$('#input').keypress(function(key){ //keypress
-    //    if (key.keyCode == 13) {    //is key 'enter'
-    //        var formInput = $("input[name=cmd]").val(); //store input from form
-    //        console.log("formInput = "+formInput);
-    //        $('.active').toggle();  //hide input form
-    //        $('.append').before(currentdir.directory+">"+formInput+"</br>");  //display command recieved
-    //        
-    //        if (formInput == "dir") { //outputs formatted directory list
-    //            $('.append').before("&nbsp; Volume in drive C is OS</br>&nbsp; Volume Serial Number is 34C6-2E57</br>");
-    //            $('.append').before("</br>&nbsp; Directory of "+ currentdir.directory +"</br></br>");
-    //            
-    //            for (var i in currentdir.folderlist) {
-    //                $('.append').before("<div class='dates'>"+"8/30/13</br>"+"</div>");
-    //                $('.append').before("<div class='times'>"+"3:32 PM</br>"+"</div>");
-    //                $('.append').before("<div class='size'>"+"&nbsp;"+"</br></div>");
-    //                $('.append').before("<div class='name'>"+currentdir.folderlist[i]+"</br></div></br>");
-    //            }
-    //            for (var i in currentdir.filelist) {
-    //                $('.append').before("<div class='dates'>"+"8/30/13</br>"+"</div>");
-    //                $('.append').before("<div class='times'>"+"3:32 PM</br>"+"</div>");
-    //                $('.append').before("<div class='size'>"+"-"+"</br></div>");
-    //                $('.append').before("<div class='name'>"+currentdir.filelist[i]+"</br></div></br>");
-    //            }
-    //
-    //            $('.append').before("<div class='eleft'>"+currentdir.filelist.length+" file(s)</br></div>");
-    //            $('.append').before("<div class='eright'>"+currentdir.filelist.length*2048+" bytes</br></div></br>");
-    //            $('.append').before("<div class='eleft'>"+currentdir.folderlist.length+" folder(s)</br></div>");
-    //            $('.append').before("<div class='eright'>&nbsp; bytes</br></div>");
-    //            $('.append').before("</br></br>");
-    //        }
-    //        else if (formInput == "cd ..") { //code for cd ..
-    //            var count = 0;
-    //            while (count < folders.length) {    //loops through array 'folders'
-    //                if (folders[count].directory == currentdir.inside || folders[count].directory == currentdir.inside + "\\") { //accounts for directories with and without '//'
-    //                    currentdir = folders[count]; //changes current folder
-    //                    count = folders.length; //sets count higher than limit
-    //                    $(".append").before("</br>");
-    //                }
-    //                else {
-    //                    count++;
-    //                }
-    //            }
-    //        }
-    //        else if (formInput.substring(0, 2) == "cd" && formInput != "cd .." && formInput.length > 2) { //check if input is 'cd' but not 'cd ..'
-    //            
-    //            var recognizedpath = false;
-    //            var inputDir = formInput.substring(3, formInput.length);
-    //            
-    //            if (formInput.substring(3,5) == "C:") { //check to see in input is a path
-    //                console.log("intended directory: "+formInput);
-    //                var i = 0;
-    //                while (i < folders.length) {
-    //                    if (inputDir == folders[i].directory) {
-    //                        currentdir = folders[i];
-    //                        $(".append").before("</br>");
-    //                        recognizedpath = true;
-    //                        i = folders.length;
-    //                    }
-    //                    else {
-    //                        i++;
-    //                    }
-    //                }
-    //            }
-    //            else { //input is folder name or unrecognized
-    //                var i = 0;
-    //                while (i < currentdir.folderlist.length) {
-    //                    if (inputDir == currentdir.folderlist[i]) {
-    //                        i = currentdir.folderlist.length;
-    //                        var j = 0;
-    //                        while (j < folders.length) {
-    //                            if (inputDir == folders[j].folderName && (folders[j].inside == currentdir.directory || folders[j].inside + "\\" == currentdir.directory)) {
-    //                                currentdir = folders[j];
-    //                                $(".append").before("</br>");
-    //                                console.log("currentdir=intended dir");
-    //                                recognizedpath = true;
-    //                                j = folders.length+1;
-    //                            }
-    //                            else {
-    //                                j++;
-    //                            }
-    //                        }
-    //                    }
-    //                    else {
-    //                        i++;
-    //                    }
-    //                }
-    //            }
-    //            if (recognizedpath == false) {
-    //                $('.append').before("The system could not find the path specified.</br></br>");
-    //            }
-    //            else {
-    //            }
-    //        }
-    //        else if (formInput == "cd") {
-    //            $('.append').before(currentdir.directory+"</br></br>");
-    //        }
-    //        else if (formInput == "cls") {
-    //            $('.appendhelper').html("<div class='append'></div>")
-    //        }
-    //        else if (formInput == "") {
-    //            $('.append').before("");
-    //        }
-    //        else if (formInput.substring(0,2) == "m ") {
-    //            $('.append').before("<marquee>"+formInput.substring(2, formInput.length)+"</marquee></br></br>");
-    //        }
-    //        else if (formInput.substring(0,5) == "echo ") {
-    //            $('.append').before(formInput.substring(5, formInput.length)+"</br></br>");
-    //        }
-    //        else if (formInput.substring(0, 6) == "mkdir ") {
-    //            var samename = false;
-    //            var i = 0;
-    //            while (i < currentdir.folderlist.length) {
-    //                if (currentdir.folderlist[i] == formInput.substring(6, formInput.length)) {
-    //                    samename = true;
-    //                    i = currentdir.folderlist.length;
-    //                }
-    //                else {
-    //                    i++;
-    //                }
-    //            }
-    //            if (samename == true) {
-    //                $('.append').before("There is already a folder with that name.</br></br>");
-    //            }
-    //            else {
-    //                folders[folders.length] = new Dir(currentdir.directory, formInput.substring(6, formInput.length));
-    //                currentdir.folderlist[currentdir.folderlist.length] = formInput.substring(6, formInput.length);
-    //                $('.append').before("</br>");
-    //            }
-    //        }
-    //        else {
-    //            var fileopen = false;
-    //            var i = 0;
-    //            while (i < currentdir.filelist.length) {
-    //                if (formInput == currentdir.filelist[i]) {
-    //                    console.log("opening file");
-    //                    i = currentdir.filelist.length;
-    //                    fileopen = true;
-    //                }
-    //                else {
-    //                    i++;
-    //                }
-    //            }
-    //            if (fileopen == false) {
-    //                $('.append').before("'"+formInput+"' is not recognized as an internal or external command,</br>operable program or batch file.</br></br>");
-    //            }
-    //            else {
-    //            }
-    //        }
-    //        $('.currentdir').html(currentdir.directory+">");
-    //        $("input[type=text], textarea").val("");
-    //        $('.active').toggle();
-    //    }
-    //});
-});
+function PreparePath(inpath) {
+    inpath = inpath.replace(/\s+/g, '');
+    return inpath.split("/");
+}
+
+function currentline() {
+    var start = "~";
+    var newOut = "";
+    if (fs.currentdir != fs) {
+        var curdir = fs.currentdir.buildpath().split("/");
+        if (curdir[1] == "home" && curdir.length >= 3) {
+            for (var i = 3; i < curdir.length; i++) {
+                start += curdir[i];
+            }
+            newOut = start;
+        }
+        else {
+            newOut = fs.currentdir.buildpath();
+        }
+    }
+    else {
+        newOut = "/";
+    }
+    return("riley@riley-U56E:"+newOut+"$");
+}
+
+function list() {
+    var lsarray = [];
+    for (var i = 0; i < fs.currentdir.contents.length; i++) {
+        lsarray.push(fs.currentdir.contents[i].name);
+    }
+    return(lsarray.sort().join(" ")+"</br>");
+}
