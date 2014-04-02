@@ -208,7 +208,10 @@ function currentline() {
         var curdir = fs.currentdir.buildpath().split("/");
         for (var i = 0; i < curdir.length; i++) {
             if (curdir[i] == fs.userdir.name) {
-                newOut = "~/"
+                newOut = "~";
+            }
+            else if (curdir[i] == "") {
+                newOut += "";
             }
             else {
                 newOut += "/" + curdir[i];

@@ -14,6 +14,24 @@ new Dir("boot");
 new Dir("boot/EFI");
 new Dir("boot/EFI/efi");
 new Dir("boot/EFI/efi/boot");
+new Dir("bin");
+new Dir("cdrom");
+new Dir("lib");
+new Dir("lost+found");
+new Dir("mnt");
+new Dir("proc");
+new Dir("run");
+new Dir("selinux");
+new Dir("sys");
+new Dir("dev");
+new Dir("lib64");
+new Dir("media");
+new Dir("opt");
+new Dir("root");
+new Dir("sbin");
+new Dir("srv");
+new Dir("tmp");
+new Dir("var");
 
 new Dir("home/riley");
 new Dir("home/riley/Documents");
@@ -35,7 +53,7 @@ new Command("ls", function() {
     $('.append').append(list());
 });
 new Command("clear", function() {
-    $('.append').html();
+    $('.append').html("");
 });
 
 $(document).ready(function(){
