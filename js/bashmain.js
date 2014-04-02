@@ -16,6 +16,26 @@ new Dir("boot/EFI");
 new Dir("boot/EFI/efi");
 new Dir("boot/EFI/efi/boot");
 
+ChangeDir("home/riley");
+fs.userdir = fs.currentdir;
+ChangeDir("/");
+
+new Command("cd", function(path) {
+    ChangeDir(path);
+});
+new Command("cd..", function() {
+    ChangeDir("..");
+});
+new Command("mkdir", function(path) {
+    new Dir(path);
+});
+new Command("ls", function() {
+    $('.append').append(list());
+});
+new Command("clear", function() {
+    $('.append').html();
+});
+
 $(document).ready(function(){
     $('.currentdir').html(currentline());
     $("input[type=text], textarea").val("");
@@ -26,18 +46,7 @@ $(document).ready(function(){
             $('.active').toggle();
             $('.append').append(currentline()+" "+formInput+"</br>");
             
-            if (parsing[0] == "cd") {
-                ChangeDir(parsing[1]);
-            }
-            else if (parsing[0] == "cd..") {
-                ChangeDir("..")
-            }
-            else if (parsing[0] == "mkdir") {
-                new Dir(parsing[1]);
-            }
-            else if (parsing[0] == "ls") {
-                $('.append').append(list());
-            }
+            runCommand(parsing[0],parsing[1]);
             
             $('.currentdir').html(currentline());
             $("input[type=text], textarea").val("");

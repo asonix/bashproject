@@ -4,6 +4,7 @@ function FileSystem() {
     this.container = this;
     this.type = "filesystem";
     this.name = "mockfs";
+    this.userdir;
 }
 
 function DirCreate(path) {
@@ -15,7 +16,7 @@ function DirCreate(path) {
     var currentdir;
     var returndir;
     if (path[0] == "") {
-        fs.currentdir == fs;
+        fs.currentdir = fs;
         currentdir = fs.currentdir;
         returndir = DirCreate(newpath);
         return(returndir);
@@ -33,9 +34,7 @@ function DirCreate(path) {
     if (newpath.length != 0) {
         for (var i = 0; i < currentdir.contents.length; i++) {
             cur = currentdir.contents[i];
-            console.log("searching for " + path[0]);
             if (cur.type == "folder" && cur.name == path[0]) {
-                console.log("found " + path[0]);
                 fs.currentdir = cur;
                 check = true;
                 returndir = DirCreate(newpath);
@@ -47,9 +46,7 @@ function DirCreate(path) {
     else {
         for (var i = 0; i < currentdir.contents.length; i++) {
             cur = currentdir.contents[i];
-            console.log("searching for " + path[0]);
             if (cur.type == "folder" && cur.name == path[0]) {
-                console.log("found " + path[0]);
                 fs.currentdir = cur;
                 check = true;
             }
@@ -75,30 +72,34 @@ function DirSearch(path) {
     for (var i = 1; i < path.length; i++) {
         newpath.push(path[i]);
     }
-    var currentdir;
+    var nowdir;
     var returndir;
+    
     if (path[0] == "") {
-        fs.currentdir == fs;
-        currentdir = fs.currentdir;
+        fs.currentdir = fs;
+        nowdir = fs.currentdir;
         returndir = DirSearch(newpath);
+        fs.currentdir = savedir;
         return(returndir);
     }
     else if (path[0] == "..") {
         fs.currentdir = fs.currentdir.container;
         returndir = DirSearch(newpath);
+        fs.currentdir = savedir;
         return(returndir);
     }
+    else if (path[0] == "~") {
+        fs.currentdir = fs.userdir;
+    }
     else {
-        currentdir = fs.currentdir;
+        nowdir = fs.currentdir;
     }
     var cur;
     var check = false;
     if (newpath.length != 0) {
-        for (var i = 0; i < currentdir.contents.length; i++) {
-            cur = currentdir.contents[i];
-            console.log("searching for " + path[0]);
+        for (var i = 0; i < nowdir.contents.length; i++) {
+            cur = nowdir.contents[i];
             if (cur.type == "folder" && cur.name == path[0]) {
-                console.log("found " + path[0]);
                 fs.currentdir = cur;
                 check = true;
                 returndir = DirSearch(newpath);
@@ -108,11 +109,9 @@ function DirSearch(path) {
         }
     }
     else {
-        for (var i = 0; i < currentdir.contents.length; i++) {
-            cur = currentdir.contents[i];
-            console.log("searching for " + path[0]);
+        for (var i = 0; i < nowdir.contents.length; i++) {
+            cur = nowdir.contents[i];
             if (cur.type == "folder" && cur.name == path[0]) {
-                console.log("found " + path[0]);
                 fs.currentdir = savedir;
                 return(cur);
             }
@@ -122,7 +121,7 @@ function DirSearch(path) {
         return("ERROR: The directory "+newpath[0]+" does not exist.");
     }
     else if(newpath.length == 0 && check == false){
-        return(currentdir);
+        return(nowdir);
     }
     else {
         return("why");
@@ -131,7 +130,7 @@ function DirSearch(path) {
 
 function Dir(inpath) {
     this.type = "folder";
-    var path = PreparePath(inpath);
+    var path = preparePath(inpath);
     this.contents = [];
     this.container = DirCreate(path);
     this.container.contents.push(this);
@@ -153,12 +152,46 @@ function File(path) {
     this.name = "";
 }
 
+function Command(name,command) {
+    this.name = name;
+    this.type = "command";
+    var path = preparePath("/usr/bin/"+this.name);
+    this.container = DirCreate(path);
+    this.container.contents.push(this);
+    
+    var currentdir = this;
+    this.buildpath = function() {
+        if (currentdir.container.type == "folder") {
+            return(currentdir.container.buildpath() + "/" + currentdir.name);
+        }
+        else {
+            return("/" + currentdir.name);
+        }
+    }
+    this.command = command;
+}
+
+function runCommand(command,args) {
+    console.log("currentdir: " + fs.currentdir.name);
+    var prevdir = fs.currentdir;
+    fs.currentdir = DirSearch(preparePath("/usr/bin"));
+    for (var i = 0; i < fs.currentdir.contents.length; i++) {
+        if (fs.currentdir.contents[i].name == command) {
+            var commanddir = fs.currentdir;
+            fs.currentdir = prevdir;
+            var returned = commanddir.contents[i].command(args);
+            return(returned);
+        }
+    }
+    return("ERROR: command not found.");
+}
+
 function ChangeDir(inpath) {
-    var path = PreparePath(inpath);
+    var path = preparePath(inpath);
     fs.currentdir = DirSearch(path);
 }
 
-function PreparePath(inpath) {
+function preparePath(inpath) {
     inpath = inpath.replace(/\s+/g, '');
     return inpath.split("/");
 }
@@ -170,7 +203,7 @@ function currentline() {
         var curdir = fs.currentdir.buildpath().split("/");
         if (curdir[1] == "home" && curdir.length >= 3) {
             for (var i = 3; i < curdir.length; i++) {
-                start += curdir[i];
+                start += "/" + curdir[i];
             }
             newOut = start;
         }
