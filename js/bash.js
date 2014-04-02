@@ -89,7 +89,13 @@ function DirSearch(path) {
         return(returndir);
     }
     else if (path[0] == "~") {
+        if (newpath[0] == "") {
+            newpath = [];
+        }
         fs.currentdir = fs.userdir;
+        returndir = DirSearch(newpath);
+        fs.currentdir = savedir;
+        return(returndir);
     }
     else {
         nowdir = fs.currentdir;
@@ -197,18 +203,16 @@ function preparePath(inpath) {
 }
 
 function currentline() {
-    var start = "~";
     var newOut = "";
     if (fs.currentdir != fs) {
         var curdir = fs.currentdir.buildpath().split("/");
-        if (curdir[1] == "home" && curdir.length >= 3) {
-            for (var i = 3; i < curdir.length; i++) {
-                start += "/" + curdir[i];
+        for (var i = 0; i < curdir.length; i++) {
+            if (curdir[i] == fs.userdir.name) {
+                newOut = "~/"
             }
-            newOut = start;
-        }
-        else {
-            newOut = fs.currentdir.buildpath();
+            else {
+                newOut += "/" + curdir[i];
+            }
         }
     }
     else {

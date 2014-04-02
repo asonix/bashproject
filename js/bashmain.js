@@ -1,13 +1,12 @@
+//REQUIRED
 var fs = new FileSystem();
 new Dir("home");
-new Dir("home/riley");
-new Dir("home/riley/Documents");
-new Dir("home/riley/Downloads");
-new Dir("home/riley/Music");
-new Dir("home/riley/Pictures");
-new Dir("home/riley/Videos");
 new Dir("usr");
 new Dir("usr/bin");
+
+fs.userdir = DirSearch(preparePath("home"));
+
+//OPTIONAL
 new Dir("usr/share");
 new Dir("etc");
 new Dir("etc/grub");
@@ -16,9 +15,12 @@ new Dir("boot/EFI");
 new Dir("boot/EFI/efi");
 new Dir("boot/EFI/efi/boot");
 
-ChangeDir("home/riley");
-fs.userdir = fs.currentdir;
-ChangeDir("/");
+new Dir("home/riley");
+new Dir("home/riley/Documents");
+new Dir("home/riley/Downloads");
+new Dir("home/riley/Music");
+new Dir("home/riley/Pictures");
+new Dir("home/riley/Videos");
 
 new Command("cd", function(path) {
     ChangeDir(path);
