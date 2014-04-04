@@ -13,3 +13,6 @@ new Command("ls", function() {
 new Command("clear", function() {
     $('.append').html("");
 });
+new Command("rmdir", function(path) {
+    removeDir(path);
+});

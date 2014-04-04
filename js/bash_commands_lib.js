@@ -32,9 +32,9 @@ function removeDir(path) {
     if (dir != false && dir.type == "folder") {
         workingdir = dir;
         if (workingdir.contents.length == 0) {
-            for (var i = 0; i < workingdir.parent.contents.length; i++) {
-                if (workingdir.parent.contents[i] == workingdir) {
-                    workingdir.parent.contents.splice(i);
+            for (var i = 0; i < workingdir.container.contents.length; i++) {
+                if (workingdir.container.contents[i] == workingdir) {
+                    workingdir.container.contents.splice(i, 1);
                 }
             }
         }
