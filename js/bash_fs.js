@@ -29,6 +29,7 @@ function Dir(inpath) {
 function File(path) {
     this.type = "file";
     this.name = "";
+    this.contents = "";
 }
 
 function Command(name,command) {

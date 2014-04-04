@@ -5,7 +5,7 @@ new Command("cd..", function() {
     ChangeDir("..");
 });
 new Command("mkdir", function(args) {
-    new Dir(args);
+    new Dir(args[0]);
 });
 new Command("ls", function() {
     $('.append').append(list());
