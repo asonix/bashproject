@@ -1,6 +1,8 @@
 function ChangeDir(inpath) {
-    var path = preparePath(inpath);
-    fs.currentdir = DirSearch(path);
+    var dir = handleErrors(DirSearch(preparePath(inpath)));
+    if (dir != false) {
+        fs.currentdir = dir;
+    }
 }
 
 function list() {
@@ -12,15 +14,48 @@ function list() {
 }
 
 function DirCreate(path) {
-    var savedir = fs.currentdir;
     var newpath = [];
     if (path.length > 1) {
         for (var i = 0; i < path.length-1; i++) {
             newpath.push(path[i]);
         }
-        return(DirSearch(newpath));
+        var dir = DirSearch(newpath);
+        return(dir);
     }
     else {
         return(fs.currentdir);
     }
+}
+
+function removeDir(path) {
+    var dir = DirSearch(preparePath(path));
+    if (dir != false && dir.type == "folder") {
+        workingdir = dir;
+        if (workingdir.contents.length == 0) {
+            for (var i = 0; i < workingdir.parent.contents.length; i++) {
+                if (workingdir.parent.contents[i] == workingdir) {
+                    workingdir.parent.contents.splice(i);
+                }
+            }
+        }
+        else {
+            handleErrors("ERROR: Directory not empty.");
+        }
+    }
+}
+
+function remove(args) {
+    
+}
+
+function touch(args) {
+
+}
+
+function move(args) {
+
+}
+
+function copy(args) {
+
 }

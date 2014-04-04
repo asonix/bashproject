@@ -1,84 +1,76 @@
-function DirSearch(path) {
-    var savedir = fs.currentdir;
+function DirSearch(path,workingdirectory) {
+    if (typeof(workingdirectory) == "undefined") {
+        workingdirectory = fs.currentdir;
+    }
+    
     var newpath = [];
+
     for (var i = 1; i < path.length; i++) {
         newpath.push(path[i]);
     }
-    var nowdir;
+
     var returndir;
     
     if (path[0] == "") {
-        fs.currentdir = fs;
-        nowdir = fs.currentdir;
-        returndir = DirSearch(newpath);
-        fs.currentdir = savedir;
+        workingdirectory = fs;
+        if (newpath.length != 0) {
+            returndir = DirSearch(newpath,workingdirectory);
+        }
+        else {
+            returndir = workingdirectory;
+        }
         return(returndir);
     }
     else if (path[0] == "..") {
-        fs.currentdir = fs.currentdir.container;
-        returndir = DirSearch(newpath);
-        fs.currentdir = savedir;
+        workingdirectory = workingdirectory.container;
+        if (newpath.length != 0) {
+            returndir = DirSearch(newpath,workingdirectory);
+        }
+        else {
+            returndir = workingdirectory;
+        }
         return(returndir);
     }
     else if (path[0] == "~") {
-        if (newpath[0] == "") {
-            newpath = [];
+        workingdirectory = fs.userdir;
+        if (newpath.length == 0) {
+            return(workingdirectory);
         }
-        fs.currentdir = fs.userdir;
-        returndir = DirSearch(newpath);
-        fs.currentdir = savedir;
+        returndir = DirSearch(newpath,workingdirectory);
         return(returndir);
     }
-    else {
-        nowdir = fs.currentdir;
-    }
     var cur;
-    var check = false;
     if (newpath.length != 0) {
-        for (var i = 0; i < nowdir.contents.length; i++) {
-            cur = nowdir.contents[i];
+        for (var i = 0; i < workingdirectory.contents.length; i++) {
+            cur = workingdirectory.contents[i];
             if (cur.type == "folder" && cur.name == path[0]) {
-                fs.currentdir = cur;
-                check = true;
-                returndir = DirSearch(newpath);
-                fs.currentdir = savedir;
+                workingdirectory = cur;
+                returndir = DirSearch(newpath,workingdirectory);
                 return(returndir);
             }
         }
     }
     else {
-        for (var i = 0; i < nowdir.contents.length; i++) {
-            cur = nowdir.contents[i];
+        for (var i = 0; i < workingdirectory.contents.length; i++) {
+            cur = workingdirectory.contents[i];
             if (cur.type == "folder" && cur.name == path[0]) {
-                fs.currentdir = savedir;
                 return(cur);
             }
         }
     }
-    if (newpath.length > 0 && check == false) {
-        return("ERROR: The directory "+newpath[0]+" does not exist.");
-    }
-    else if(newpath.length == 0 && check == false){
-        return(nowdir);
-    }
-    else {
-        return("why");
-    }
+    return("ERROR: The directory "+path[0]+" does not exist.");
 }
 
 function runCommand(command,args) {
-    console.log("currentdir: " + fs.currentdir.name);
-    var prevdir = fs.currentdir;
-    fs.currentdir = DirSearch(preparePath("/usr/bin"));
-    for (var i = 0; i < fs.currentdir.contents.length; i++) {
-        if (fs.currentdir.contents[i].name == command) {
-            var commanddir = fs.currentdir;
-            fs.currentdir = prevdir;
-            var returned = commanddir.contents[i].command(args);
+    var workingdir = DirSearch(preparePath("/usr/bin"));
+    
+    for (var i = 0; i < workingdir.contents.length; i++) {
+        if (workingdir.contents[i].name == command) {
+            var returned = workingdir.contents[i].command(args);
             return(returned);
         }
     }
-    return("ERROR: command not found.");
+    handleErrors("ERROR: command not found.");
 }
 
 function preparePath(inpath) {
@@ -107,3 +99,14 @@ function currentline() {
     }
     return("riley@riley-U56E:"+newOut+"$");
 }
+
+function handleErrors(output) {
+    if (typeof(output) == "string") {
+        $('.append').append(output+"</br>");
+        return(false);
+    }
+    else {
+        return(output);
+    }
+}
+
