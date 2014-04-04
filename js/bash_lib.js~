@@ -10,6 +10,7 @@ function DirSearch(path,workingdirectory) {
     }
 
     var returndir;
+    console.log(path[0] + path.length);
     if (path[0] == "") {
         workingdirectory = fs;
         if (newpath.length != 0) {

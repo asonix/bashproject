@@ -7,13 +7,12 @@ function FileSystem() {
     this.userdir;
 }
 
-function Dir(inpath) {
+function Dir(name,container) {
     this.type = "folder";
-    var path = preparePath(inpath);
     this.contents = [];
-    this.container = DirCreate(path);
+    this.container = container;
     this.container.contents.push(this);
-    this.name = path[path.length-1];
+    this.name = name;
     
     var currentdir = this;
     this.buildpath = function() {
@@ -26,17 +25,19 @@ function Dir(inpath) {
     }
 }
 
-function File(path) {
+function File(name,container) {
     this.type = "file";
-    this.name = "";
+    this.name = name;
     this.contents = "";
+    this.container = container;
+    this.container.contents.push(this);
 }
 
 function Command(name,command) {
     this.name = name;
     this.type = "command";
-    var path = preparePath("/usr/bin/"+this.name);
-    this.container = DirCreate(path);
+    var path = preparePath("/usr/bin");
+    this.container = DirSearch(path);
     this.container.contents.push(this);
     
     var currentdir = this;

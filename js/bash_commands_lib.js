@@ -1,6 +1,6 @@
 function ChangeDir(args) {
     var dir = handleErrors(DirSearch(preparePath(args[0])));
-    if (dir != false) {
+    if (dir != false && (dir.type == "folder" || dir.type == "filesystem")) {
         fs.currentdir = dir;
     }
 }
@@ -13,22 +13,29 @@ function list(args) {
     return(lsarray.sort().join(" ")+"</br>");
 }
 
-function DirCreate(path) {
+function DirCreate(args,type) {
+    var path = args[0];
     var newpath = [];
+    var dir;
     if (path.length > 1) {
         for (var i = 0; i < path.length-1; i++) {
             newpath.push(path[i]);
         }
-        var dir = DirSearch(newpath);
-        return(dir);
+        dir = DirSearch(newpath);
     }
     else {
-        return(fs.currentdir);
+        dir = fs.currentdir;
+    }
+    if (type == "folder") {
+        new Dir(path[path.length-1],dir);
+    }
+    else {
+        new File(path[path.length-1],dir);
     }
 }
 
 function removeDir(args) {
-    var dir = DirSearch(preparePath(args[0]));
+    var dir = handleErrors(DirSearch(preparePath(args[0])));
     if (dir != false && dir.type != "folder") {
         handleErrors("ERROR: " + dir + " is not a directory.");
     }
@@ -41,7 +48,7 @@ function removeDir(args) {
 }
 
 function remove(args) {
-   var dir = DirSearch(preparePath(args[0]));
+   var dir = handleErrors(DirSearch(preparePath(args[0])));
    if (dir != false) {
        if (dir.type == "folder") {
            if (dir.contents.length == 0) {
@@ -56,6 +63,7 @@ function remove(args) {
            }
        }
        else {
+           console.log(dir);
            for (var i = 0; i < dir.container.contents.length; i++) {
                dir.container.contents.splice(i,1);
            }
