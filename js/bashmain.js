@@ -10,7 +10,7 @@ $(document).ready(function(){
             $('.active').toggle();
             $('.append').append(currentline()+" "+formInput+"</br>");
             
-            runCommand(parsing[0],parsing[1]);
+            runCommand(parsing);
             
             $('.currentdir').html(currentline());
             $("input[type=text], textarea").val("");

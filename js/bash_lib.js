@@ -61,7 +61,8 @@ function DirSearch(path,workingdirectory) {
     return("ERROR: The directory "+path[0]+" does not exist.");
 }
 
-function runCommand(command,args) {
+function runCommand(args) {
+    var command = args.splice(0,1);
     var workingdir = DirSearch(preparePath("/usr/bin"));
     
     for (var i = 0; i < workingdir.contents.length; i++) {

@@ -1,11 +1,11 @@
-function ChangeDir(inpath) {
-    var dir = handleErrors(DirSearch(preparePath(inpath)));
+function ChangeDir(args) {
+    var dir = handleErrors(DirSearch(preparePath(args[0])));
     if (dir != false) {
         fs.currentdir = dir;
     }
 }
 
-function list() {
+function list(args) {
     var lsarray = [];
     for (var i = 0; i < fs.currentdir.contents.length; i++) {
         lsarray.push(fs.currentdir.contents[i].name);
@@ -27,25 +27,43 @@ function DirCreate(path) {
     }
 }
 
-function removeDir(path) {
-    var dir = DirSearch(preparePath(path));
-    if (dir != false && dir.type == "folder") {
-        workingdir = dir;
-        if (workingdir.contents.length == 0) {
-            for (var i = 0; i < workingdir.container.contents.length; i++) {
-                if (workingdir.container.contents[i] == workingdir) {
-                    workingdir.container.contents.splice(i, 1);
-                }
-            }
-        }
-        else {
-            handleErrors("ERROR: Directory not empty.");
-        }
+function removeDir(args) {
+    var dir = DirSearch(preparePath(args[0]));
+    if (dir != false && dir.type != "folder") {
+        handleErrors("ERROR: " + dir + " is not a directory.");
+    }
+    else if (dir != false && dir.type == "folder") {
+        remove(args);
+    }
+    else {
+        handleErrors(dir);
     }
 }
 
 function remove(args) {
-    
+   var dir = DirSearch(preparePath(args[0]));
+   if (dir != false) {
+       if (dir.type == "folder") {
+           if (dir.contents.length == 0) {
+               for (var i = 0; i < dir.container.contents.length; i++) {
+                    if (dir == dir.container.contents[i]) {
+                       dir.container.contents.splice(i,1);
+                   }
+               }
+           }
+           else {
+               handleErrors("ERROR: Directory not empty.");
+           }
+       }
+       else {
+           for (var i = 0; i < dir.container.contents.length; i++) {
+               dir.container.contents.splice(i,1);
+           }
+       }
+   }
+   else {
+       handleErrors(dir);
+   }
 }
 
 function touch(args) {
