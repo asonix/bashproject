@@ -5,7 +5,8 @@ new Command("cd..", function() {
     ChangeDir("..");
 });
 new Command("mkdir", function(args) {
-    DirCreate(args[0],"folder");
+    handleErrors(args[0]);
+    DirCreate([args],"folder");
 });
 new Command("ls", function() {
     $('.append').append(list());
@@ -20,5 +21,5 @@ new Command("rm", function(args) {
     remove(args);
 });
 new Command("touch", function(args) {
-    Create(args[0],"file")
+    DirCreate([args],"file")
 });
