@@ -23,3 +23,9 @@ new Command("rm", function(args) {
 new Command("touch", function(args) {
     DirCreate([args],"file")
 });
+new Command("mv", function(args) {
+    move(args);
+});
+new Command("cp", function(args) {
+    copy(args);
+});

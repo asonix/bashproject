@@ -91,12 +91,13 @@ function move(args) {
     }
     if (recursive == true) {
         var p1 = handleErrors(DirSearch(preparePath(path1)));
-        var path2test;
+        var path2test = [];
         if (p1 != false) {
-            for (var i = 0; i < path2.length-1; i++) {
-                path2test.push(path2[i]);
+            for (var i = 0; i < preparePath(path2).length-1; i++) {
+                path2test.push(preparePath(path2)[i]);
             }
-            var p2test = handleErrors(DirSearch(preparePath(path2test)));
+            console.log(path2test);
+            var p2test = handleErrors(DirSearch(path2test));
             if (p2test != false) {
                 var p2 = handleErrors(DirSearch(preparePath(path2)));
                 if (p2 == false) {
@@ -115,7 +116,7 @@ function move(args) {
         }
     }
     else {
-        var path1 = handleErrors(DirSearch(preparePath(path1)));
+        var p1 = handleErrors(DirSearch(preparePath(path1)));
         var path2test;
         if (p1 != false && p1.contents.length == 0) {
             for (var i = 0; i < path2.length-1; i++) {
@@ -141,27 +142,6 @@ function move(args) {
         else {
             handleErrors("ERROR: Directory not empty");
         }
-    }
-}
-
-function copy(args) {
-    var path1;
-    var path2;
-    var recursive = false;
-    for (var i = 0; i < args.length; i++) {
-        if (args[i] == "-r") {
-            recursive = true;
-        }
-        else if (typeof(path1) != "undefined") {
-            path2 = args[i];
-        }
-        else {
-            path1 = args[i];
-        }
-    }
-    
-    var path2test;
-    for (var i = 0; i < path2.length-1; i++) {
     }
 }
 
