@@ -1,6 +1,6 @@
-function ChangeDir(args) {
-    var dir = handleErrors(DirSearch(preparePath(args[0])));
-    if (dir != false && (dir.type == "folder" || dir.type == "filesystem")) {
+function changeDirectory(args) {
+    var dir = handleErrors(search(preparePath(args[0]),"","folder"));
+    if (dir != false) {
         fs.currentdir = dir;
     }
 }
@@ -13,29 +13,43 @@ function list(args) {
     return(lsarray.sort().join(" ")+"</br>");
 }
 
-function DirCreate(args,type) {
+function makeDirectory(args,type) {
     var path = args[0];
+    console.log(typeof(path));
+    for (var i = 0; i < path[0].length; i++) {
+        if (path[0][i] == "/") {
+            console.log(i);
+            path = path[0].split("/");
+        }
+    }
     var newpath = [];
     var dir;
-    if (path.length > 1) {
-        for (var i = 0; i < path.length-1; i++) {
-            newpath.push(path[i]);
+    var s = search(path,"",type);
+    s = s.type;
+    if (typeof(s) == "undefined") {
+        if (path.length > 1) {
+            for (var i = 0; i < path.length-1; i++) {
+                newpath.push(path[i]);
+            }
+            dir = search(newpath,"",type);
         }
-        dir = DirSearch(newpath);
+        else {
+            dir = fs.currentdir;
+        }
+        if (type == "folder") {
+            new Dir(path[path.length-1],dir);
+        }
+        else {
+            new File(path[path.length-1],dir);
+        }
     }
-    else {
-        dir = fs.currentdir;
-    }
-    if (type == "folder") {
-        new Dir(path[path.length-1],dir);
-    }
-    else {
-        new File(path[path.length-1],dir);
+    else if (search(path).type == type || (search(path).type != "folder" && type != "folder")) {
+        handleErrors("ERROR: "+path[path.length-1]+" already exists;");
     }
 }
 
 function removeDir(args) {
-    var dir = handleErrors(DirSearch(preparePath(args[0])));
+    var dir = handleErrors(search(preparePath(args[0])));
     if (dir != false && dir.type != "folder") {
         handleErrors("ERROR: " + dir + " is not a directory.");
     }
@@ -48,30 +62,31 @@ function removeDir(args) {
 }
 
 function remove(args) {
-   var dir = handleErrors(DirSearch(preparePath(args[0])));
-   if (dir != false) {
-       if (dir.type == "folder") {
-           if (dir.contents.length == 0) {
-               for (var i = 0; i < dir.container.contents.length; i++) {
-                    if (dir == dir.container.contents[i]) {
-                       dir.container.contents.splice(i,1);
-                   }
-               }
-           }
-           else {
-               handleErrors("ERROR: Directory not empty.");
-           }
-       }
-       else {
-           console.log(dir);
-           for (var i = 0; i < dir.container.contents.length; i++) {
-               dir.container.contents.splice(i,1);
-           }
-       }
-   }
-   else {
-       handleErrors(dir);
-   }
+    var dir = handleErrors(search(preparePath(args[0])));
+    if (dir != false) {
+        if (dir.type == "folder") {
+            if (dir.contents.length == 0) {
+                for (var i = 0; i < dir.container.contents.length; i++) {
+                     if (dir == dir.container.contents[i]) {
+                        dir.container.contents.splice(i,1);
+                    }
+                }
+            }
+            else {
+                handleErrors("ERROR: Directory not empty.");
+            }
+        }
+        else {
+            for (var i = 0; i < dir.container.contents.length; i++) {
+                if (dir == dir.container.contents[i]) {
+                     dir.container.contents.splice(i,1);
+                }
+            }
+        }
+    }
+    else {
+        handleErrors(dir);
+    }
 }
 
 function move(args) {
@@ -90,16 +105,15 @@ function move(args) {
         }
     }
     if (recursive == true) {
-        var p1 = handleErrors(DirSearch(preparePath(path1)));
+        var p1 = handleErrors(search(preparePath(path1)));
         var path2test = [];
         if (p1 != false) {
             for (var i = 0; i < preparePath(path2).length-1; i++) {
                 path2test.push(preparePath(path2)[i]);
             }
-            console.log(path2test);
-            var p2test = handleErrors(DirSearch(path2test));
+            var p2test = handleErrors(search(path2test));
             if (p2test != false) {
-                var p2 = handleErrors(DirSearch(preparePath(path2)));
+                var p2 = handleErrors(search(preparePath(path2)));
                 if (p2 == false) {
                     for (var i = 0; i < p1.container.contents.length; i++) {
                         if (p1.container.contents[i] == p1) {
@@ -116,15 +130,15 @@ function move(args) {
         }
     }
     else {
-        var p1 = handleErrors(DirSearch(preparePath(path1)));
+        var p1 = handleErrors(search(preparePath(path1)));
         var path2test;
         if (p1 != false && p1.contents.length == 0) {
             for (var i = 0; i < path2.length-1; i++) {
                 path2test.push(path2[i]);
             }
-            var p2test = handleErrors(DirSearch(preparePath(path2test)));
+            var p2test = handleErrors(search(preparePath(path2test)));
             if (p2test != false) {
-                var p2 = handleErrors(DirSearch(preparePath(path2)));
+                var p2 = handleErrors(search(preparePath(path2)));
                 if (p2 == false) {
                     for (var i = 0; i < p1.container.contents.length; i++) {
                         if (p1.container.contents[i] == p1) {
@@ -161,23 +175,23 @@ function copy(args) {
         }
     }
     
-    var path2test;
+    var path2test = [];
     for (var i = 0; i < path2.length-1; i++) {
             path2test.push(path2[i]);
     }
 
-    var p1 = handleErrors(DirSearch(preparePath(path1)));
+    var p1 = handleErrors(search(preparePath(path1)));
     if (p1 != false) {
-        var p2 = handleErrors(DirSearch(preparePath(path2)));
-        var p2test = handleErrors(DirSearch(preparePath(path2test)));
+        var p2 = handleErrors(search(preparePath(path2)));
+        var p2test = handleErrors(search(preparePath(path2test)));
         if (p2test != false) {
             if (p2 == false) {
-                DirCreate(p2,p1.type);
-                p2 = handleErrors(DirSearch(preparePath(path2)));
+                makeDirectory(p2,p1.type);
+                p2 = handleErrors(search(preparePath(path2)));
             }
             else {
                 p2.push(p1[p1.length-1]);
-                DirCreate(p2,p1.type);
+                makeDirectory(p2,p1.type);
             }
             
             if (recursive == false) {

@@ -37,7 +37,7 @@ function Command(name,command) {
     this.name = name;
     this.type = "command";
     var path = preparePath("/usr/bin");
-    this.container = DirSearch(path);
+    this.container = search(path,"","folder");
     this.container.contents.push(this);
     
     var currentdir = this;

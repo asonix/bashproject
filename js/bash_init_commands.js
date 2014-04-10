@@ -1,12 +1,11 @@
 new Command("cd", function(args) {
-    ChangeDir(args);
+    changeDirectory(args);
 });
 new Command("cd..", function() {
-    ChangeDir("..");
+    changeDirectory("..");
 });
 new Command("mkdir", function(args) {
-    handleErrors(args[0]);
-    DirCreate([args],"folder");
+    makeDirectory([args],"folder");
 });
 new Command("ls", function() {
     $('.append').append(list());
@@ -21,7 +20,7 @@ new Command("rm", function(args) {
     remove(args);
 });
 new Command("touch", function(args) {
-    DirCreate([args],"file")
+    makeDirectory([args],"file")
 });
 new Command("mv", function(args) {
     move(args);
