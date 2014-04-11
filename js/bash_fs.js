@@ -31,6 +31,14 @@ function File(name,container) {
     this.contents = "";
     this.container = container;
     this.container.contents.push(this);
+    this.buildpath = function() {
+        if (currentdir.container.type == "folder") {
+            return(currentdir.container.buildpath() + "/" + currentdir.name);
+        }
+        else {
+            return("/" + currentdir.name);
+        }
+    }
 }
 
 function Command(name,command) {

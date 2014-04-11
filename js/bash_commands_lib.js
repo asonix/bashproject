@@ -61,15 +61,38 @@ function removeDir(args) {
 }
 
 function remove(args) {
-    var dir = search(preparePath(args[0]),"","folder");
-    if (typeof(dir) == "string") {
-        dir = handleErrors(search(preparePath(args[0]),"","file"));
+    var recursive = false;
+    var dir;
+    for (var i = 0; i < args.length; i++) {
+        if (args[i] == "-r") {
+            recursive = true;
+        }
+        else {
+            dir = search(preparePath(args[i]),"","folder");
+            if (typeof(dir) == "string") {
+                dir = handleErrors(search(preparePath(args[i]),"","file"));
+            }
+        }
     }
     if (dir != false) {
         if (dir.type == "folder") {
             if (dir.contents.length == 0) {
                 for (var i = 0; i < dir.container.contents.length; i++) {
-                     if (dir == dir.container.contents[i]) {
+                    if (dir == dir.container.contents[i]) {
+                        console.log("removing: "+dir.container.contents[i].name);
+                        dir.container.contents.splice(i,1);
+                    }
+                }
+            }
+            else if (recursive == true) {
+                for (var i = 0; i < dir.contents.length; i++) {
+                    console.log("calling remove on: "+dir.contents[i].name);
+                    remove([dir.contents[i].buildpath(),"-r"]);
+                }
+                for (var i = 0; i < dir.container.contents.length; i++) {
+                    if (dir == dir.container.contents[i]) {
+                        console.log("removing: "+dir.name);
+                        console.log("removing: "+dir.container.contents[i].name);
                         dir.container.contents.splice(i,1);
                     }
                 }
