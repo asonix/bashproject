@@ -1,6 +1,6 @@
-function search(path,workingdirectory,type) {
+function search(path,workingdirectory,type,cur_win_dir,cur_win) {
     if (typeof(workingdirectory) == "undefined" || typeof(workingdirectory) == "string") {
-        workingdirectory = fs.currentdir;
+        workingdirectory = cur_win_dir;
     }
     var newpath = [];
 
@@ -11,7 +11,7 @@ function search(path,workingdirectory,type) {
     if (path[0] == "") {
         workingdirectory = fs;
         if (newpath.length != 0) {
-            returndir = search(newpath,workingdirectory,type);
+            returndir = search(newpath,workingdirectory,type,cur_win);
         }
         else {
             returndir = workingdirectory;
@@ -21,7 +21,7 @@ function search(path,workingdirectory,type) {
     else if (path[0] == "..") {
         workingdirectory = workingdirectory.container;
         if (newpath.length != 0) {
-            returndir = search(newpath,workingdirectory,type);
+            returndir = search(newpath,workingdirectory,type,cur_win);
         }
         else {
             returndir = workingdirectory;
@@ -33,7 +33,7 @@ function search(path,workingdirectory,type) {
         if (newpath.length == 0) {
             return(workingdirectory);
         }
-        returndir = search(newpath,workingdirectory,type);
+        returndir = search(newpath,workingdirectory,type,cur_win);
         return(returndir);
     }
     var cur;
@@ -42,7 +42,7 @@ function search(path,workingdirectory,type) {
             cur = workingdirectory.contents[i];
             if (cur.name == path[0] && (cur.type == "folder" || cur.type == "filesystem")) {
                 workingdirectory = cur;
-                returndir = search(newpath,workingdirectory,type);
+                returndir = search(newpath,workingdirectory,type,cur_win);
                 return(returndir);
             }
         }
@@ -60,16 +60,16 @@ function search(path,workingdirectory,type) {
     return("ERROR: "+path[0]+" does not exist.");
 }
 
-function runCommand(args) {
+function runCommand(args,cur_windir,cur_win) {
     var command = args.splice(0,1);
-    var workingdir = search(preparePath("/usr/bin"),"","folder");
+    var workingdir = search(preparePath("/usr/bin"),"","folder",cur_windir);
     for (var i = 0; i < workingdir.contents.length; i++) {
         if (workingdir.contents[i].name == command) {
-            var returned = workingdir.contents[i].command(args);
+            var returned = workingdir.contents[i].command(args,cur_windir,cur_win);
             return(returned);
         }
     }
-    handleErrors("ERROR: command not found.");
+    handleErrors("ERROR: command not found.",cur_win);
 }
 
 function preparePath(inpath) {
@@ -77,10 +77,10 @@ function preparePath(inpath) {
     return inpath.split("/");
 }
 
-function currentline() {
+function currentline(cur_win) {
     var newOut = "";
-    if (fs.currentdir != fs) {
-        var curdir = fs.currentdir.buildpath().split("/");
+    if (cur_win != fs) {
+        var curdir = cur_win.buildpath().split("/");
         for (var i = 0; i < curdir.length; i++) {
             if (curdir[i] == fs.userdir.name) {
                 newOut = "~";
@@ -99,9 +99,10 @@ function currentline() {
     return("riley@riley-U56E:"+newOut+"$");
 }
 
-function handleErrors(output) {
+function handleErrors(output,cur_win) {
     if (typeof(output) == "string") {
-        $('.append').append(output+"</br>");
+        cur_win.append.append(output+"</br>");
+        console.log(cur_win.append);
         return(false);
     }
     else {

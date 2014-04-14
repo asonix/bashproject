@@ -19,3 +19,8 @@ body {
     font-family: 'Droid Sans Mono', monospace;
     size: auto;
 }
+.t1,
+.t2,
+.t3 {
+    height: 33%;
+}

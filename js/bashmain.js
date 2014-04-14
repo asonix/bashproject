@@ -1,20 +1,5 @@
 $(document).ready(function(){
-    $('.currentdir').html(currentline());
-    $("input[type=text], textarea").val("");
-    
-    $('#input').keypress(function(key){
-        if (key.keyCode == 13) {    //'enter'
-            var formInput = $("input[name=cmd]").val();
-            var parsing = formInput.split(" ");
-            
-            $('.active').toggle();
-            $('.append').append(currentline()+" "+formInput+"</br>");
-            
-            runCommand(parsing);
-            
-            $('.currentdir').html(currentline());
-            $("input[type=text], textarea").val("");
-            $('.active').toggle();
-        }
-    });
+    new BashWindow($(".t1"));
+    new BashWindow($(".t2"));
+    new BashWindow($(".t3"));
 });

@@ -1,6 +1,7 @@
 function FileSystem() {
     this.contents = [];
     this.currentdir = this;
+    this.currentdirectory = this.currentdir;
     this.container = this;
     this.type = "filesystem";
     this.name = "mockfs";
